@@ -1,6 +1,6 @@
 
 // Weather API service using OpenWeatherMap with comprehensive global coverage
-const API_KEY = 'demo_key' // Replace with actual API key
+const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY || 'your_api_key_here'
 const BASE_URL = 'https://api.openweathermap.org/data/2.5'
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0'
 
@@ -178,82 +178,60 @@ export const weatherAPI = {
   async searchGlobalLocations(query) {
     if (query.length < 2) return []
     
-    const results = []
-    const searchTerm = query.toLowerCase()
-
-    // Search through countries, cities, territories
-    globalLocations.countries.forEach(country => {
-      // Add country itself
-      if (country.name.toLowerCase().includes(searchTerm)) {
-        results.push({
-          name: country.name,
-          type: 'country',
-          lat: this.getCountryCoordinates(country.code).lat,
-          lon: this.getCountryCoordinates(country.code).lon,
-          country: country.name,
-          code: country.code
-        })
+    try {
+      const response = await fetch(
+        `${GEO_URL}/direct?q=${encodeURIComponent(query)}&limit=10&appid=${API_KEY}`
+      )
+      
+      if (!response.ok) {
+        throw new Error(`Geocoding API error: ${response.status}`)
       }
+      
+      const data = await response.json()
+      
+      return data.map(location => ({
+        name: location.name,
+        type: 'city',
+        lat: location.lat,
+        lon: location.lon,
+        country: location.country,
+        state: location.state,
+        code: location.country
+      }))
+    } catch (error) {
+      console.error('Error searching locations:', error)
+      // Fallback to mock search if API fails
+      const results = []
+      const searchTerm = query.toLowerCase()
 
-      // Add cities
-      country.cities?.forEach(city => {
-        if (city.toLowerCase().includes(searchTerm)) {
+      globalLocations.countries.forEach(country => {
+        if (country.name.toLowerCase().includes(searchTerm)) {
           results.push({
-            name: city,
-            type: 'city',
-            lat: Math.random() * 180 - 90, // Mock coordinates
-            lon: Math.random() * 360 - 180,
+            name: country.name,
+            type: 'country',
+            lat: this.getCountryCoordinates(country.code).lat,
+            lon: this.getCountryCoordinates(country.code).lon,
             country: country.name,
             code: country.code
           })
         }
-      })
 
-      // Add territories/colonies
-      country.territories?.forEach(territory => {
-        if (territory.toLowerCase().includes(searchTerm)) {
-          results.push({
-            name: territory,
-            type: 'territory',
-            lat: Math.random() * 180 - 90,
-            lon: Math.random() * 360 - 180,
-            country: country.name,
-            code: country.code
-          })
-        }
-      })
-
-      // Add states/provinces/regions
-      const regions = [...(country.states || []), ...(country.provinces || []), ...(country.regions || [])]
-      regions.forEach(region => {
-        if (region.toLowerCase().includes(searchTerm)) {
-          results.push({
-            name: region,
-            type: 'region',
-            lat: Math.random() * 180 - 90,
-            lon: Math.random() * 360 - 180,
-            country: country.name,
-            code: country.code
-          })
-        }
-      })
-    })
-
-    // Search dependencies
-    globalLocations.dependencies.forEach(dependency => {
-      if (dependency.toLowerCase().includes(searchTerm)) {
-        results.push({
-          name: dependency,
-          type: 'dependency',
-          lat: Math.random() * 180 - 90,
-          lon: Math.random() * 360 - 180,
-          country: 'Various',
-          code: 'XX'
+        country.cities?.forEach(city => {
+          if (city.toLowerCase().includes(searchTerm)) {
+            results.push({
+              name: city,
+              type: 'city',
+              lat: this.getCountryCoordinates(country.code).lat + (Math.random() * 4 - 2),
+              lon: this.getCountryCoordinates(country.code).lon + (Math.random() * 4 - 2),
+              country: country.name,
+              code: country.code
+            })
+          }
         })
-      }
-    })
+      })
 
-    return results.slice(0, 10)
+      return results.slice(0, 10)
+    }
   },
 
   // Get coordinates for countries (mock data)
@@ -277,40 +255,70 @@ export const weatherAPI = {
 
   async getCurrentWeather(lat, lon, locationName = '') {
     try {
-      // Generate weather based on location characteristics
-      const weather = { ...mockCurrentWeather }
+      const response = await fetch(
+        `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+      )
       
-      // Modify weather based on location
-      if (locationName) {
-        const forecast = generateGlobalForecast(locationName)
-        if (forecast.length > 0) {
-          weather.temp = forecast[0].main.temp
-          weather.humidity = forecast[0].main.humidity
-          weather.pressure = forecast[0].main.pressure
-          weather.weather = forecast[0].weather
-          weather.description = forecast[0].weather[0].description
-        }
+      if (!response.ok) {
+        throw new Error(`Weather API error: ${response.status}`)
       }
-
-      return new Promise(resolve => {
-        setTimeout(() => resolve(weather), 1000)
-      })
+      
+      const data = await response.json()
+      
+      return {
+        temp: data.main.temp,
+        feels_like: data.main.feels_like,
+        temp_min: data.main.temp_min,
+        temp_max: data.main.temp_max,
+        pressure: data.main.pressure,
+        humidity: data.main.humidity,
+        visibility: data.visibility,
+        wind_speed: data.wind.speed,
+        wind_deg: data.wind.deg,
+        uvi: data.uvi || 0,
+        description: data.weather[0].description,
+        weather: data.weather,
+        timezone: data.timezone,
+        sunrise: data.sys.sunrise,
+        sunset: data.sys.sunset
+      }
     } catch (error) {
       console.error('Error fetching current weather:', error)
-      throw error
+      // Fallback to mock data if API fails
+      return mockCurrentWeather
     }
   },
 
   async getForecast(lat, lon, locationName = '') {
     try {
-      const forecast = generateGlobalForecast(locationName || `${lat},${lon}`)
+      const response = await fetch(
+        `${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+      )
       
-      return new Promise(resolve => {
-        setTimeout(() => resolve(forecast), 1200)
-      })
+      if (!response.ok) {
+        throw new Error(`Forecast API error: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      return data.list.map(item => ({
+        dt: item.dt,
+        main: {
+          temp: item.main.temp,
+          temp_min: item.main.temp_min,
+          temp_max: item.main.temp_max,
+          humidity: item.main.humidity,
+          pressure: item.main.pressure
+        },
+        weather: item.weather,
+        wind: item.wind,
+        clouds: item.clouds,
+        pop: item.pop
+      }))
     } catch (error) {
       console.error('Error fetching forecast:', error)
-      throw error
+      // Fallback to mock data if API fails
+      return generateGlobalForecast(locationName || `${lat},${lon}`)
     }
   },
 
