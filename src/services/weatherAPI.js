@@ -1,6 +1,6 @@
 
 // Weather API service using OpenWeatherMap with comprehensive global coverage
-const API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY || 'your_api_key_here'
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || 'your_api_key_here'
 const BASE_URL = 'https://api.openweathermap.org/data/2.5'
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0'
 
