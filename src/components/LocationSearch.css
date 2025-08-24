@@ -1,0 +1,149 @@
+
+.location-search {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(15px);
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.app.dark .location-search {
+  background: rgba(52, 73, 94, 0.98);
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.app.dark .search-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-input-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #666;
+  z-index: 1;
+}
+
+.app.dark .search-icon {
+  color: #bdc3c7;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 12px 12px 44px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.app.dark .search-input {
+  background: rgba(44, 62, 80, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ecf0f1;
+}
+
+.search-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.app.dark .close-btn {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app.dark .close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.search-loading {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.app.dark .search-loading {
+  color: #bdc3c7;
+}
+
+.search-results {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.search-result {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.app.dark .search-result {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ecf0f1;
+}
+
+.search-result:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.search-result:last-child {
+  border-bottom: none;
+}
+
+.result-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.result-details {
+  font-size: 14px;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
