@@ -1,26 +1,49 @@
+
 import React, { useState, useEffect } from 'react'
-import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
-import { weatherAPI } from '../services/weatherAPI'
+import { Wind } from 'lucide-react'
 import './AQIDisplay.css'
 
 const AQIDisplay = ({ location }) => {
   const [aqiData, setAqiData] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const getAQILevel = (aqi) => {
+    if (aqi <= 50) return { level: 'Good', color: '#4CAF50', description: 'Air quality is satisfactory' }
+    if (aqi <= 100) return { level: 'Moderate', color: '#FFC107', description: 'Air quality is acceptable for most people' }
+    if (aqi <= 150) return { level: 'Unhealthy for Sensitive Groups', color: '#FF9800', description: 'Sensitive people should limit outdoor exposure' }
+    if (aqi <= 200) return { level: 'Unhealthy', color: '#F44336', description: 'Everyone should limit outdoor activities' }
+    if (aqi <= 300) return { level: 'Very Unhealthy', color: '#9C27B0', description: 'Health alert: everyone should avoid outdoor activities' }
+    return { level: 'Hazardous', color: '#795548', description: 'Health warning: emergency conditions' }
+  }
 
   useEffect(() => {
     const fetchAQI = async () => {
+      if (!location) return
+
+      setLoading(true)
+      setError(null)
+
       try {
-        setLoading(true)
-        // Check if location is available before fetching
-        if (location && location.lat && location.lon) {
-          const data = await weatherAPI.getAirQuality(location.lat, location.lon)
-          setAqiData(data)
-        } else {
-          setAqiData(null) // Reset if location is not valid
+        const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
+        
+        if (!apiKey) {
+          throw new Error('API key not found')
         }
-      } catch (error) {
-        console.error('Error fetching AQI:', error)
-        setAqiData(null) // Ensure aqiData is null on error
+
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/air_pollution?lat=${location.lat}&lon=${location.lon}&appid=${apiKey}`
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch air quality data')
+        }
+
+        const data = await response.json()
+        setAqiData(data)
+      } catch (err) {
+        console.error('Error fetching AQI:', err)
+        setError(err.message)
       } finally {
         setLoading(false)
       }
@@ -29,92 +52,63 @@ const AQIDisplay = ({ location }) => {
     fetchAQI()
   }, [location])
 
-  const getAQIInfo = (aqi) => {
-    switch (aqi) {
-      case 1:
-        return {
-          level: 'Good',
-          color: '#2ecc71',
-          icon: CheckCircle,
-          description: 'Air quality is satisfactory'
-        }
-      case 2:
-        return {
-          level: 'Fair',
-          color: '#f1c40f',
-          icon: CheckCircle,
-          description: 'Air quality is acceptable'
-        }
-      case 3:
-        return {
-          level: 'Moderate',
-          color: '#e67e22',
-          icon: AlertTriangle,
-          description: 'May cause issues for sensitive people'
-        }
-      case 4:
-        return {
-          level: 'Poor',
-          color: '#e74c3c',
-          icon: XCircle,
-          description: 'Health effects for everyone'
-        }
-      case 5:
-        return {
-          level: 'Very Poor',
-          color: '#8e44ad',
-          icon: XCircle,
-          description: 'Serious health effects'
-        }
-      default:
-        return {
-          level: 'Unknown',
-          color: '#95a5a6',
-          icon: AlertTriangle,
-          description: 'AQI data unavailable'
-        }
-    }
-  }
-
   if (loading) {
     return (
-      <div className="aqi-display">
-        <h3>Air Quality Index</h3>
-        <div className="aqi-loading">Loading AQI data...</div>
+      <div className="aqi-display card">
+        <div className="aqi-loading">
+          <Wind size={24} />
+          <p>Loading air quality data...</p>
+        </div>
       </div>
     )
   }
 
-  if (!aqiData) {
+  if (error) {
     return (
-      <div className="aqi-display">
-        <h3>Air Quality Index</h3>
-        <div className="aqi-error">Unable to load AQI data</div>
+      <div className="aqi-display card">
+        <div className="aqi-error">
+          <p>Unable to load air quality data</p>
+          <small>{error}</small>
+        </div>
       </div>
     )
   }
 
-  const aqiInfo = getAQIInfo(aqiData.aqi)
-  const Icon = aqiInfo.icon
+  if (!aqiData || !aqiData.list || aqiData.list.length === 0) {
+    return (
+      <div className="aqi-display card">
+        <div className="aqi-error">
+          <p>No air quality data available</p>
+        </div>
+      </div>
+    )
+  }
 
+  const currentAQI = aqiData.list[0]
+  const aqiValue = currentAQI.main.aqi * 50 // Convert to US AQI scale approximation
+  const aqiInfo = getAQILevel(aqiValue)
+  
   const pollutants = [
-    { name: 'PM2.5', value: aqiData.pm2_5, unit: 'µg/m³' },
-    { name: 'PM10', value: aqiData.pm10, unit: 'µg/m³' },
-    { name: 'CO', value: aqiData.co, unit: 'µg/m³' },
-    { name: 'NO₂', value: aqiData.no2, unit: 'µg/m³' },
-    { name: 'O₃', value: aqiData.o3, unit: 'µg/m³' }
+    { name: 'CO', value: currentAQI.components.co, unit: 'μg/m³' },
+    { name: 'NO₂', value: currentAQI.components.no2, unit: 'μg/m³' },
+    { name: 'O₃', value: currentAQI.components.o3, unit: 'μg/m³' },
+    { name: 'PM2.5', value: currentAQI.components.pm2_5, unit: 'μg/m³' },
+    { name: 'PM10', value: currentAQI.components.pm10, unit: 'μg/m³' },
+    { name: 'SO₂', value: currentAQI.components.so2, unit: 'μg/m³' }
   ]
 
   return (
-    <div className="aqi-display">
+    <div className="aqi-display card">
       <h3>Air Quality Index</h3>
-
+      
       <div className="aqi-main">
-        <div className="aqi-indicator" style={{ backgroundColor: aqiInfo.color }}>
-          <Icon size={24} color="white" />
-          <span className="aqi-value">{aqiData.aqi}</span>
+        <div 
+          className="aqi-indicator" 
+          style={{ background: aqiInfo.color }}
+        >
+          <div className="aqi-value">{Math.round(aqiValue)}</div>
         </div>
-
+        
         <div className="aqi-info">
           <div className="aqi-level" style={{ color: aqiInfo.color }}>
             {aqiInfo.level}
@@ -126,11 +120,12 @@ const AQIDisplay = ({ location }) => {
       </div>
 
       <div className="pollutants-grid">
-        {pollutants.map((pollutant, index) => (
-          <div key={index} className="pollutant-item">
+        {pollutants.map((pollutant) => (
+          <div key={pollutant.name} className="pollutant-item">
             <div className="pollutant-name">{pollutant.name}</div>
             <div className="pollutant-value">
-              {pollutant.value.toFixed(1)} <span className="pollutant-unit">{pollutant.unit}</span>
+              {pollutant.value?.toFixed(1) || 'N/A'}
+              <span className="pollutant-unit"> {pollutant.unit}</span>
             </div>
           </div>
         ))}
