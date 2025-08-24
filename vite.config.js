@@ -7,7 +7,10 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5000,
-    strictPort: false,
-    open: false
+    allowedHosts: [
+      'localhost',
+      '.replit.dev',
+      '988b0c33-07d4-47ef-b690-1dd12e016f86-00-1c7qm5cyiwu2.sisko.replit.dev'
+    ]
   }
 })
