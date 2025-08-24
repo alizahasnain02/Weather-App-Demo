@@ -20,5 +20,9 @@ args = "npm start"
 run = ["sh", "-c", "node -v"]
 
 [[ports]]
+localPort = 443
+externalPort = 3000
+
+[[ports]]
 localPort = 5000
 externalPort = 80
