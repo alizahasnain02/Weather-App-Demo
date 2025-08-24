@@ -1,0 +1,57 @@
+Daily Forecast
+
+Problem Statement
+
+Design a comprehensive and fast real‑time weather experience that meets the high expectations of Gen Z users. In this model, users receive live, local insights through a clear map view with city search, a friendly weather box, simple charts, and concise, youthful text. We are exploring advanced functionalities such as GPS auto‑location, fast notifications, and offline data access, while carefully balancing battery usage, privacy, and data limits. Additional features, including an AI chat for personalized tips and forecast explanations, as well as AQI display and an emergency mode for prompt SMS or WhatsApp communication, all contribute to a solution designed to build trust and drive daily engagement.
+
+Background
+
+This initiative responds to the evolving demand from a digitally savvy generation that expects more than just static weather data. Traditionally, weather apps have concentrated on delivering data, but today's users seek a dynamic, real‑time platform. With Daily Forecast, the aim is to blend real‑time, local insights with a global perspective, offering a user-friendly interface enriched by cutting-edge features such as auto-location, rapid notifications, and offline access. Against this backdrop, our approach carefully weighs the tradeoffs between high performance, battery conservation, and user privacy, setting the stage for both ambitious goals and stringent constraints.
+
+Goals
+
+
+
+
+
+Deliver a live, global weather platform under the Daily Forecast brand that resonates with Gen Z users.
+
+
+
+Implement a clear map view with city search, a friendly weather box, and simple charts for quick insights.
+
+
+
+Integrate advanced features such as GPS auto‑location, fast notifications, and offline access for seamless functionality.
+
+
+
+Develop an AI chat that offers personalized tips, forecast explanations, and tailored suggestions to enhance user engagement.
+
+
+
+Incorporate AQI displays and an emergency mode for swift communication via SMS or WhatsApp, ensuring safety and climate awareness.
+
+Key Constraints and Tradeoffs
+
+
+
+
+
+Balancing real‑time performance with battery conservation, particularly with continuous GPS and notification features.
+
+
+
+Ensuring robust privacy controls and obtaining clear user consent while delivering quick and accurate data.
+
+
+
+Managing data limits effectively, especially in the context of offline access to ensure data freshness.
+
+
+
+Guaranteeing the transparency and reliability of the AI chat component, including addressing potential failure scenarios.
+
+
+
+Maintaining a user-centric design that simplifies a feature-rich experience without compromising usability.
