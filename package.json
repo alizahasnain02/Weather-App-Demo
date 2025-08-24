@@ -10,6 +10,7 @@
     "start": "vite --host 0.0.0.0 --port 5000"
   },
   "dependencies": {
+    "@keenoho/vite-plugin-compress-file": "^1.0.4",
     "axios": "^1.3.0",
     "chart.js": "^4.2.1",
     "jest-email-reporter": "^1.0.4",
@@ -19,7 +20,8 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
-    "react-router-dom": "^6.8.0"
+    "react-router-dom": "^6.8.0",
+    "vite-plugin-jsx-inject": "^0.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
