@@ -1,2 +1,24 @@
+modules = ["nodejs-24"]
+run = "node -v"
 [nix]
 channel = "stable-25_05"
+packages = ["nodejs-slim_20"]
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 42519170
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+
+[deployment]
+run = ["sh", "-c", "node -v"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
