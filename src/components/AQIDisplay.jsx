@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { weatherAPI } from '../services/weatherAPI'
@@ -12,10 +11,16 @@ const AQIDisplay = ({ location }) => {
     const fetchAQI = async () => {
       try {
         setLoading(true)
-        const data = await weatherAPI.getAirQuality(location.lat, location.lon)
-        setAqiData(data)
+        // Check if location is available before fetching
+        if (location && location.lat && location.lon) {
+          const data = await weatherAPI.getAirQuality(location.lat, location.lon)
+          setAqiData(data)
+        } else {
+          setAqiData(null) // Reset if location is not valid
+        }
       } catch (error) {
         console.error('Error fetching AQI:', error)
+        setAqiData(null) // Ensure aqiData is null on error
       } finally {
         setLoading(false)
       }
@@ -27,44 +32,44 @@ const AQIDisplay = ({ location }) => {
   const getAQIInfo = (aqi) => {
     switch (aqi) {
       case 1:
-        return { 
-          level: 'Good', 
-          color: '#2ecc71', 
+        return {
+          level: 'Good',
+          color: '#2ecc71',
           icon: CheckCircle,
           description: 'Air quality is satisfactory'
         }
       case 2:
-        return { 
-          level: 'Fair', 
-          color: '#f1c40f', 
+        return {
+          level: 'Fair',
+          color: '#f1c40f',
           icon: CheckCircle,
           description: 'Air quality is acceptable'
         }
       case 3:
-        return { 
-          level: 'Moderate', 
-          color: '#e67e22', 
+        return {
+          level: 'Moderate',
+          color: '#e67e22',
           icon: AlertTriangle,
           description: 'May cause issues for sensitive people'
         }
       case 4:
-        return { 
-          level: 'Poor', 
-          color: '#e74c3c', 
+        return {
+          level: 'Poor',
+          color: '#e74c3c',
           icon: XCircle,
           description: 'Health effects for everyone'
         }
       case 5:
-        return { 
-          level: 'Very Poor', 
-          color: '#8e44ad', 
+        return {
+          level: 'Very Poor',
+          color: '#8e44ad',
           icon: XCircle,
           description: 'Serious health effects'
         }
       default:
-        return { 
-          level: 'Unknown', 
-          color: '#95a5a6', 
+        return {
+          level: 'Unknown',
+          color: '#95a5a6',
           icon: AlertTriangle,
           description: 'AQI data unavailable'
         }
@@ -103,13 +108,13 @@ const AQIDisplay = ({ location }) => {
   return (
     <div className="aqi-display">
       <h3>Air Quality Index</h3>
-      
+
       <div className="aqi-main">
         <div className="aqi-indicator" style={{ backgroundColor: aqiInfo.color }}>
           <Icon size={24} color="white" />
           <span className="aqi-value">{aqiData.aqi}</span>
         </div>
-        
+
         <div className="aqi-info">
           <div className="aqi-level" style={{ color: aqiInfo.color }}>
             {aqiInfo.level}
