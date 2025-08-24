@@ -5,104 +5,6 @@ import './AQIDisplay.css'
 
 const AQIDisplay = ({ location }) => {
   const [aqiData, setAqiData] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchAQI = async () => {
-      if (!location) return
-      
-      setLoading(true)
-      try {
-        // Mock AQI data for demo purposes
-        const mockAQI = {
-          aqi: Math.floor(Math.random() * 100) + 1,
-          pm25: Math.floor(Math.random() * 50) + 10,
-          pm10: Math.floor(Math.random() * 80) + 20,
-          no2: Math.floor(Math.random() * 30) + 5,
-          o3: Math.floor(Math.random() * 60) + 15
-        }
-        setAqiData(mockAQI)
-      } catch (error) {
-        console.error('Error fetching AQI:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAQI()
-  }, [location])
-
-  const getAQIStatus = (aqi) => {
-    if (aqi <= 50) return { status: 'Good', color: '#00e400' }
-    if (aqi <= 100) return { status: 'Moderate', color: '#ffff00' }
-    if (aqi <= 150) return { status: 'Unhealthy for Sensitive', color: '#ff7e00' }
-    if (aqi <= 200) return { status: 'Unhealthy', color: '#ff0000' }
-    if (aqi <= 300) return { status: 'Very Unhealthy', color: '#8f3f97' }
-    return { status: 'Hazardous', color: '#7e0023' }
-  }
-
-  if (loading) {
-    return (
-      <div className="aqi-container card">
-        <h3>Air Quality</h3>
-        <div className="loading">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!aqiData) {
-    return (
-      <div className="aqi-container card">
-        <h3>Air Quality</h3>
-        <div className="no-data">No data available</div>
-      </div>
-    )
-  }
-
-  const { status, color } = getAQIStatus(aqiData.aqi)
-
-  return (
-    <div className="aqi-container card">
-      <h3>
-        <Wind size={24} />
-        Air Quality Index
-      </h3>
-      
-      <div className="aqi-main">
-        <div className="aqi-value" style={{ color }}>
-          {aqiData.aqi}
-        </div>
-        <div className="aqi-status" style={{ color }}>
-          {status}
-        </div>
-      </div>
-
-      <div className="aqi-details">
-        <div className="aqi-item">
-          <span>PM2.5</span>
-          <span>{aqiData.pm25} μg/m³</span>
-        </div>
-        <div className="aqi-item">
-          <span>PM10</span>
-          <span>{aqiData.pm10} μg/m³</span>
-        </div>
-        <div className="aqi-item">
-          <span>NO₂</span>
-          <span>{aqiData.no2} μg/m³</span>
-        </div>
-        <div className="aqi-item">
-          <span>O₃</span>
-          <span>{aqiData.o3} μg/m³</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default AQIDisplay
-
-const AQIDisplay = ({ location }) => {
-  const [aqiData, setAqiData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -123,26 +25,28 @@ const AQIDisplay = ({ location }) => {
       setError(null)
 
       try {
-        const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
+        // For demo purposes, using mock data
+        const mockAQI = {
+          list: [{
+            main: { aqi: Math.floor(Math.random() * 5) + 1 },
+            components: {
+              co: Math.floor(Math.random() * 1000) + 200,
+              no2: Math.floor(Math.random() * 50) + 10,
+              o3: Math.floor(Math.random() * 100) + 20,
+              pm2_5: Math.floor(Math.random() * 30) + 5,
+              pm10: Math.floor(Math.random() * 50) + 10,
+              so2: Math.floor(Math.random() * 20) + 2
+            }
+          }]
+        }
         
-        if (!apiKey) {
-          throw new Error('API key not found')
-        }
-
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/air_pollution?lat=${location.lat}&lon=${location.lon}&appid=${apiKey}`
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch air quality data')
-        }
-
-        const data = await response.json()
-        setAqiData(data)
+        setTimeout(() => {
+          setAqiData(mockAQI)
+          setLoading(false)
+        }, 500)
       } catch (err) {
         console.error('Error fetching AQI:', err)
         setError(err.message)
-      } finally {
         setLoading(false)
       }
     }
