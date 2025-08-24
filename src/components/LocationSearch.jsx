@@ -9,26 +9,58 @@ const LocationSearch = ({ onLocationSelect, onClose }) => {
   const [loading, setLoading] = useState(false)
 
   const searchLocations = async (searchQuery) => {
-    if (searchQuery.length < 3) {
+    if (searchQuery.length < 2) {
       setResults([])
       return
     }
 
     setLoading(true)
     try {
-      // Using OpenStreetMap Nominatim API for location search
+      // First try our comprehensive global database
+      const { weatherAPI } = await import('../services/weatherAPI')
+      const globalResults = await weatherAPI.searchGlobalLocations(searchQuery)
+      
+      // Also search using OpenStreetMap for additional coverage
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`
       )
-      const data = await response.json()
+      const osmData = await response.json()
       
-      const formattedResults = data.map(item => ({
+      const osmResults = osmData.map(item => ({
         name: item.display_name,
         lat: parseFloat(item.lat),
-        lon: parseFloat(item.lon)
+        lon: parseFloat(item.lon),
+        type: 'osm_location',
+        country: 'Various'
       }))
       
-      setResults(formattedResults)
+      // Combine and format results
+      const combinedResults = [
+        ...globalResults.map(item => ({
+          name: item.name,
+          lat: item.lat,
+          lon: item.lon,
+          type: item.type,
+          country: item.country,
+          code: item.code,
+          fullName: `${item.name}, ${item.country}`
+        })),
+        ...osmResults.map(item => ({
+          name: item.name.split(',')[0],
+          lat: item.lat,
+          lon: item.lon,
+          type: item.type,
+          country: item.country,
+          fullName: item.name
+        }))
+      ]
+      
+      // Remove duplicates and limit results
+      const uniqueResults = combinedResults.filter((result, index, self) => 
+        index === self.findIndex(r => r.name === result.name && Math.abs(r.lat - result.lat) < 0.1)
+      ).slice(0, 10)
+      
+      setResults(uniqueResults)
     } catch (error) {
       console.error('Error searching locations:', error)
       setResults([])
@@ -82,8 +114,21 @@ const LocationSearch = ({ onLocationSelect, onClose }) => {
               className="search-result"
               onClick={() => handleLocationClick(location)}
             >
-              <div className="result-name">{location.name.split(',')[0]}</div>
-              <div className="result-details">{location.name}</div>
+              <div className="result-header">
+                <div className="result-name">{location.name}</div>
+                <span className="result-type">{location.type || 'location'}</span>
+              </div>
+              <div className="result-details">
+                {location.country && (
+                  <span className="result-country">📍 {location.country}</span>
+                )}
+                {location.code && location.code !== 'XX' && (
+                  <span className="result-code">{location.code}</span>
+                )}
+              </div>
+              <div className="result-coordinates">
+                {location.lat.toFixed(4)}°, {location.lon.toFixed(4)}°
+              </div>
             </button>
           ))}
         </div>

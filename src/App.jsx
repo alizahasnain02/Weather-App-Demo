@@ -38,9 +38,10 @@ function App() {
   const fetchWeatherData = async (lat, lon) => {
     try {
       setLoading(true)
+      const locationName = location.name
       const [weather, forecastData] = await Promise.all([
-        weatherAPI.getCurrentWeather(lat, lon),
-        weatherAPI.getForecast(lat, lon)
+        weatherAPI.getCurrentWeather(lat, lon, locationName),
+        weatherAPI.getForecast(lat, lon, locationName)
       ])
       setCurrentWeather(weather)
       setForecast(forecastData)
